@@ -1,3 +1,5 @@
+const BASE_URL = 'https://todolist-zrno.onrender.com';
+
 let token = localStorage.getItem('token');
 let userId = localStorage.getItem('userId');
 
@@ -6,25 +8,25 @@ async function register() {
   const username = prompt('Choose a username:');
   const password = prompt('Choose a password:');
 
-  const res = await fetch('/register', {
+  const res = await fetch(`${BASE_URL}/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password })
   });
 
   if (res.ok) {
-    alert('Registration successful. Now login.');
+    alert('✅ Registered! Now log in.');
   } else {
-    alert('Registration failed.');
+    alert('❌ Registration failed.');
   }
 }
 
 // Login
 async function login() {
-  const username = prompt('Enter username:');
-  const password = prompt('Enter password:');
+  const username = prompt('Username:');
+  const password = prompt('Password:');
 
-  const res = await fetch('/login', {
+  const res = await fetch(`${BASE_URL}/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password })
@@ -36,26 +38,25 @@ async function login() {
     userId = data.userId;
     localStorage.setItem('token', token);
     localStorage.setItem('userId', userId);
+    alert('✅ Login successful');
     loadTasks();
-    alert('Login successful');
   } else {
-    alert('Login failed');
+    alert('❌ Login failed');
   }
 }
 
-// Load tasks (requires token)
+// Load tasks
 async function loadTasks() {
   if (!token) return;
 
-  const res = await fetch('/tasks', {
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
+  const res = await fetch(`${BASE_URL}/tasks`, {
+    headers: { Authorization: `Bearer ${token}` }
   });
 
   const tasks = await res.json();
   const list = document.getElementById('taskList');
   list.innerHTML = '';
+
   tasks.forEach(task => {
     const item = document.createElement('li');
     item.textContent = task.task;
@@ -63,11 +64,9 @@ async function loadTasks() {
     const delBtn = document.createElement('button');
     delBtn.textContent = 'Delete';
     delBtn.onclick = async () => {
-      await fetch(`/delete/${task._id}`, {
+      await fetch(`${BASE_URL}/delete/${task._id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
       loadTasks();
     };
@@ -77,16 +76,16 @@ async function loadTasks() {
   });
 }
 
-// Add task (requires token)
+// Add task
 async function addTask() {
   const task = document.getElementById('taskInput').value;
   if (!task || !token) return;
 
-  await fetch('/add', {
+  await fetch(`${BASE_URL}/add`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      Authorization: `Bearer ${token}`
     },
     body: JSON.stringify({ task })
   });
@@ -95,7 +94,7 @@ async function addTask() {
   loadTasks();
 }
 
-// Auto-load if logged in
+// Auto-load tasks if logged in
 window.onload = () => {
   if (token) loadTasks();
 };
