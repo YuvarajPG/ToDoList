@@ -8,23 +8,33 @@ async function register() {
   const username = prompt('Choose a username:');
   const password = prompt('Choose a password:');
 
-  const res = await fetch(`${BASE_URL}/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password })
-  });
+  if (!username || !password) {
+    alert('❌ Username and password are required!');
+    return;
+  }
 
-  if (res.ok) {
-    alert('✅ Registered! Now log in.');
-  } else {
-    alert('❌ Registration failed.');
+  try {
+    const res = await fetch(`${BASE_URL}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+
+    if (res.ok) {
+      alert('✅ Registered! Now please login.');
+    } else {
+      const errorText = await res.text();
+      alert(`❌ Registration failed: ${errorText}`);
+    }
+  } catch (err) {
+    alert(`❌ Error: ${err.message}`);
   }
 }
 
 // Login
 async function login() {
-  const username = prompt('Username:');
-  const password = prompt('Password:');
+  const username = prompt('Enter username:');
+  const password = prompt('Enter password:');
 
   const res = await fetch(`${BASE_URL}/login`, {
     method: 'POST',
